@@ -32,7 +32,7 @@ F90FLAGS      = $(FFLAGS)
 HEALPIXLD     = -L$(HEALPIXDIR)/lib -lhealpix -L$(FITSDIR) -l$(FITSLIB)
 
 CAMBOBJ       = constants.o utils.o $(EXTCAMBFILES) subroutines.o inifile.o $(POWERSPECTRUM).o $(RECOMBINATION).o \
-	$(REIONIZATION).o modules.o bessels.o $(EQUATIONS).o $(NONLINEAR).o lensing.o $(BISPECTRUM).o cmbmain.o camb.o axion_background.o
+	$(REIONIZATION).o modules.o bessels.o $(EQUATIONS).o $(NONLINEAR).o lensing.o $(BISPECTRUM).o cmbmain.o camb.o axion_background.o inidriver_axion_mod.o
 
 #F90CRLINK ?= -lstdc++
 
@@ -56,7 +56,7 @@ endif
 
 default: camb
 
-all: camb $(CAMBLIB)
+all: camb $(CAMBLIB) camb_shared
 
 
 subroutines.o: constants.o utils.o
@@ -74,6 +74,9 @@ camb.o: cmbmain.o
 Matrix_utils.o: utils.o
 camb: $(CAMBOBJ) $(DRIVER)
 	$(F90C) $(F90FLAGS) $(CAMBOBJ) $(DRIVER) $(F90CRLINK) -o $@
+
+camb_shared: $(CAMBOBJ)
+	$(F90C) -shared -o libcamb.so $(CAMBOBJ)
 
 $(CAMBLIB): $(CAMBOBJ)
 	ar -r $@ $(CAMBOBJ)

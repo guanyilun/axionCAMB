@@ -4,7 +4,8 @@
 !     See readme.html for documentation. This is a sample driver routine that reads
 !     in one set of parameters and produdes the corresponding output.
 
-program driver
+module inidriver_axion_mod
+
   use IniFile
   use CAMB
   use LambdaGeneral
@@ -20,10 +21,16 @@ program driver
   !Tell CAMB to solve the Klein-Gordon equation for a background axion field
   !to determine what initial condition is needed to get desired relic abundance of axions
   !today
+
   use axion_background
 #ifdef NAGF95
   use F90_UNIX
-#endif
+#endif  
+
+contains
+
+subroutine axion_driver(InputFile, P)
+
   implicit none
 
   Type(CAMBparams) P
@@ -59,11 +66,11 @@ program driver
 
   ! End axion stuff
 
-  InputFile = ''
-  if (GetParamCount() /= 0)  InputFile = GetParam(1)
+  ! InputFile = ''
+  ! if (GetParamCount() /= 0)  InputFile = GetParam(1)
   if (InputFile == '') stop 'No parameter input file'
-  print*, 'InputFile: ', InputFile
 
+  print*, 'InputFile: ', InputFile
   call Ini_Open(InputFile, 1, bad, .false.)
   if (bad) stop 'Error opening parameter file'
 
@@ -256,11 +263,6 @@ program driver
   P%omegav = 1.0d0-P%omegab-P%omegac - P%omegan -P%omegak-P%omegaax - P%omegah2_rad/((P%H0/1.d2)**2.0d0)
 
   !	print*, 'hi renee omk', P%omegak, 'omegav', P%omegav, 'grhog', grhog, 'P%grhor', (P%grhor*(c**2.0d0)/((1.d5**2.0d0)))/3.0d0, 'omegah2_rad', P%omegah2_rad 
-
-
-
-
-
 
   !JD 08/13 begin changes for nonlinear lensing of CMB + LSS compatibility
   !P%Transfer%redshifts -> P%Transfer%PK_redshifts and P%Transfer%num_redshifts -> P%Transfer%PK_num_redshifts
@@ -464,7 +466,6 @@ program driver
   else
      P%Nu_mass_eigenstates = 0
   end if
-
   ! DM: The place axion evolution is called
   ! This computes axion parameters and also creates the lookup table for axions during slow-roll.
   ! Tables for density, equation of state and sound-speed. grhoax_table, wax_table, cs2_table.
@@ -558,10 +559,10 @@ program driver
   call CAMB_cleanup
   !    call cpu_time(clock_totstop) ! RH timing	
   !     print*, 'Total time taken:', clock_totstop - clock_totstart
-  stop
+  ! stop
   !
-100 stop 'Must give num_massive number of integer physical neutrinos for each eigenstate'
-end program driver
+! 100 stop 'Must give num_massive number of integer physical neutrinos for each eigenstate'
+end subroutine axion_driver
 
 
 #ifdef RUNIDLE
@@ -577,3 +578,4 @@ subroutine SetIdle
 end subroutine SetIdle
 #endif
 
+end module inidriver_axion_mod

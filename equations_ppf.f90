@@ -2423,7 +2423,7 @@ grhoax_t=dorp*a2
     implicit none
     type(EvolutionVars) EV
     
-    real(dl) clxc, clxb, clxg, clxr, k,k2
+    real(dl) clxc, clxb, clxg, clxr, k,k2,v_ax
     real(dl) grho,gpres,dgrho,dgq,a
     real Arr(:)
     real(dl) y(EV%nvar)
@@ -2511,8 +2511,11 @@ grhoax_t=dorp*a2
     
     ! DM: output the growth rate
     
-    call GrowthRate(EV,y,tau,k,a,growth,clxtot)
-    Arr(Transfer_f) = growth
+    !call GrowthRate(EV,y,tau,k,a,growth,clxtot)
+    !Arr(Transfer_f) = growth
+	v_ax = y(EV%a_ix+1)
+	Arr(Transfer_f) = v_ax/k2
+	
     Arr(Transfer_tot) = dgrho/grho/k2
     
     
