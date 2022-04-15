@@ -70,7 +70,7 @@ subroutine axion_driver(InputFile, P)
   ! if (GetParamCount() /= 0)  InputFile = GetParam(1)
   if (InputFile == '') stop 'No parameter input file'
 
-  print*, 'InputFile: ', InputFile
+  ! print*, 'InputFile: ', InputFile
   call Ini_Open(InputFile, 1, bad, .false.)
   if (bad) stop 'Error opening parameter file'
 
@@ -200,7 +200,7 @@ subroutine axion_driver(InputFile, P)
   read(numstr, *) nmassive
 
   if (abs(nmassive-nint(nmassive))>1e-6) stop 'massive_neutrinos should now be integer (or integer array)'
-  read(numstr,*, end=100, err=100) P%Nu_Mass_numbers(1:P%Nu_mass_eigenstates)
+  read(numstr,*, end=100, err=100) P%Nu_Mass_numbers(1:P%Nu_mass_eigenstates)  ! YG: tmp comment out
   P%Num_Nu_massive = sum(P%Nu_Mass_numbers(1:P%Nu_mass_eigenstates))
 
   if (P%Num_Nu_massive>0) then
@@ -476,6 +476,8 @@ subroutine axion_driver(InputFile, P)
 
   !call cpu_time(clock_start) ! RH timing
   ! Run axion background evolution and then with arrays in hand for interpolation, run the regular CAMB
+  ! print*, 'P.nn = ', P%InitPower%nn
+
   call   w_evolve(P, badflag)
 
   !call cpu_time(clock_stop) ! RH timing 
@@ -556,13 +558,16 @@ subroutine axion_driver(InputFile, P)
 #endif
   end if
 
-  call CAMB_cleanup
+  ! call CAMB_cleanup
   !    call cpu_time(clock_totstop) ! RH timing	
   !     print*, 'Total time taken:', clock_totstop - clock_totstart
   ! stop
   !
 ! 100 stop 'Must give num_massive number of integer physical neutrinos for each eigenstate'
+100 print*, ''
 end subroutine axion_driver
+
+
 
 
 #ifdef RUNIDLE
