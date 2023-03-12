@@ -25,6 +25,7 @@ FISHER=
 #On my machine v4.5 is about 20% slower than ifort
 F90C     = gfortran
 FFLAGS =  -O3 -g -ffree-line-length-none -fpic
+# FFLAGS =  -O0 -g -ffree-line-length-none -fpic
 #-ffast-math 
 
 

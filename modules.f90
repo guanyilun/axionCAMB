@@ -184,8 +184,10 @@
     !
     real(dl) :: wax_table(ntable), grhoax_table(ntable) ,loga_table(ntable),wax_table_buff(ntable),grhoax_table_buff(ntable)
   	!Adiabatic sound speed Pdot/rhodot and its spline buffer
-    real(dl) ::cs2_table(ntable),cs2_table_buff(ntable)
+    real(dl) :: cs2_table(ntable),cs2_table_buff(ntable)
+    real(dl) :: v1_table(ntable),v2_table(ntable)
     real(dl) :: phiinit,aeq, ainit, lens_amp,drefp_hsq
+    real(dl) :: afinal = 0.0d0 !final scale factor to calculate background
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
  end type CAMBparams

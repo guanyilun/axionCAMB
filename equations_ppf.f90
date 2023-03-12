@@ -1472,8 +1472,7 @@
         
         endif
         
-        
-grhoax_t=dorp*a2
+        grhoax_t=dorp*a2
 	if (a .lt. CP%a_osc) then
 	call spline_out(CP%loga_table,CP%wax_table,CP%wax_table_buff,ntable,dlog10(a),w_ax)
 	else
@@ -2144,23 +2143,16 @@ grhoax_t=dorp*a2
 		 Ra=grhoax/(grhog+grhonu)/a_osc**3.0d0
 		 omr=(grhog+grhonu)/(grhob+grhoc)
 		 frac=grhoax/(grhoax+grhob+grhoc) ! Fraction of matter in axions	
-
-
-		 
-		 
-		 
-	! print*,a_osc,CP%a_osc
-	!calculate normalization factor for isocurvature perturbation	 
-		if(a_osc.le.CP%aeq) then
+	     ! print*,a_osc,CP%a_osc
+	     !calculate normalization factor for isocurvature perturbation	 
+		 if(a_osc.le.CP%aeq) then
 		 FF=1.0d0 ! DM: F(f) sets a_0 from a_osc FF=1 if aosc<aeq
 		 Konstant=1.0d0-frac
 		else		 											
 		 FF=((1.0d0-frac)+frac*(CP%aeq/a_osc)**3.0d0)**(-1.0d0)
 		 Konstant=(1.0d0-frac)/((1.0d0-frac)+frac*((CP%aeq/a_osc)**3.0d0))
 		end if
-		
-	
-		
+
 		initv(6,i_clxax)=1.0d0-(x*x)/(10.0d0)&
         -Konstant*(x*x)*omtau/(180.0d0)+(1.0d0/600.0d0)*(x**4.0d0)&
         +(53.0d0*(Konstant**2.0d0)*(x**2.0d0)*(omtau**2.0d0))/(140.0d0*5.0d0*16.0d0)
@@ -2190,7 +2182,7 @@ grhoax_t=dorp*a2
 		 initv(6,i_eta)=-(0.50*initv(6,i_clxg))
 		!DM: this eta is -2eta_s, see notes and below setting y(2)
 		
-		initv(6,i_qg)=initv(6,i_clxg)*x/15.0d0
+		initv(6,i_qg)=initv(6,i_clxg)*x/15.0d0 !YG: /15 or /20? see eq 20 in hlozek 2017
         initv(6,i_qr)=initv(6,i_clxg)*x/15.0d0
 		initv(6,i_vb)=0.75_dl*initv(6,i_qg)
         initv(6,i_pir)= (-9.0d0*Rb)*omtau*initv(6,i_clxg)*(1.0d0-Konstant)/(5.0d0*(75.0d0+4.0d0*Rv))
@@ -2200,10 +2192,6 @@ grhoax_t=dorp*a2
 	!	 print*,initv(6,:)
 !		print*,AA
          end if
-
-        
-        
-        
 
     if (CP%Scalar_initial_condition==initial_vector) then
         InitVec = 0
@@ -2229,9 +2217,8 @@ grhoax_t=dorp*a2
 
 
 ! Axions
-
-		y(EV%a_ix)=InitVec(i_clxax)
-		y(EV%a_ix+1)=InitVec(i_v_ax)
+	y(EV%a_ix)=InitVec(i_clxax)
+	y(EV%a_ix+1)=InitVec(i_v_ax)
     !  Photons
     y(EV%g_ix)=InitVec(i_clxg)
     y(EV%g_ix+1)=InitVec(i_qg)
@@ -2420,6 +2407,7 @@ grhoax_t=dorp*a2
     subroutine outtransf(EV, y, tau,Arr)
     !write out clxc, clxb, clxg, clxn
     use Transfer
+    use Constants
     implicit none
     type(EvolutionVars) EV
     
@@ -2432,6 +2420,8 @@ grhoax_t=dorp*a2
     real(dl) dorp
     real(dl) gr
     real(dl) clxax,grhoax_t
+    ! YG: add phi1 dependent variables
+    real(dl) m_ax, adotoa, dtauda, w_ax, cad2, cad2_use, phi1
     
     integer i	
     
@@ -2476,7 +2466,6 @@ grhoax_t=dorp*a2
     Arr(Transfer_b) = clxb/k2
     Arr(Transfer_g) = clxg/k2
     Arr(Transfer_r) = clxr/k2
-    Arr(Transfer_axion) = clxax/k2
     
     dgrho = 0
     grho =  0
@@ -2514,10 +2503,35 @@ grhoax_t=dorp*a2
     !call GrowthRate(EV,y,tau,k,a,growth,clxtot)
     !Arr(Transfer_f) = growth
 	v_ax = y(EV%a_ix+1)
-	Arr(Transfer_f) = v_ax/k2
-	
+
+    ! YG: save phi1 instead of v_ax
+    ! phi1 = -3 H (1-cad2) u_ax rho_a / (2 m_a^2 k phi0)
+    !      = -3 H (1-cad2) u_ax rho_a / (2 m_a k (rho_a(1-w_a))^0.5)
+
+    ! YG: get H conformal, m_ax
+    adotoa = 1/(a*dtauda(a))
+    m_ax = EV%m_ax
+    ! YG: get w_ax, cad2
+    if (a .lt. CP%a_osc) then
+        call spline_out(CP%loga_table,CP%wax_table,CP%wax_table_buff,ntable,dlog10(a),w_ax)
+        ! YG: get c_ad^2 (cad2)
+        call spline_out(CP%loga_table(2:ntable),CP%cs2_table(2:ntable),CP%cs2_table_buff(2:ntable),ntable-1,&
+            dlog10(a),cad2)  ! fixme: condition of aosc
+        cad2_use = dble(cad2)
+    else
+        w_ax = 0
+        cad2_use = 0.d0
+    end if
+
+    ! YG: calculate phi1
+    ! recall that grhoax_t = 8piG rho_ax a^2
+    ! phi1 = -3.d0 * adotoa * (1-cad2_use) * v_ax * grhoax_t**0.5 / (2.d0 * m_ax * k * (1-w_ax)**0.5 * a) / kappa**0.5
+    ! Arr(Transfer_axion) = phi1
+    phi1 = v_ax*grhoax_t**0.5 / (k*(1+w_ax)**0.5) / kappa**0.5
+	Arr(Transfer_f) = phi1
+    Arr(Transfer_axion) = clxax /k2
+	! Arr(Transfer_f) = v_ax/k2
     Arr(Transfer_tot) = dgrho/grho/k2
-    
     
     end subroutine outtransf
 

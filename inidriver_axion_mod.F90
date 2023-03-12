@@ -477,7 +477,6 @@ subroutine axion_driver(InputFile, P)
   !call cpu_time(clock_start) ! RH timing
   ! Run axion background evolution and then with arrays in hand for interpolation, run the regular CAMB
   ! print*, 'P.nn = ', P%InitPower%nn
-
   call   w_evolve(P, badflag)
 
   !call cpu_time(clock_stop) ! RH timing 
@@ -571,7 +570,8 @@ end subroutine axion_driver
 
 ! second version that will be used for forecast or constraint:
 ! 1. allows m_ax to change freely, i.e., not reading it from INI file.
-! 
+! 2. allows omegaax to change by either change axfrac and omegada (dm+axion) when
+!    use_axfrac is true, or by changing omegaax directly when use_axfrac is false
 subroutine axion_driver_rerun(InputFile, P)
 
   implicit none
@@ -624,7 +624,7 @@ subroutine axion_driver_rerun(InputFile, P)
 
   highL_unlensed_cl_template = Ini_Read_String_Default('highL_unlensed_cl_template',highL_unlensed_cl_template)
 
-  call CAMB_SetDefParams(P)
+  ! call CAMB_SetDefParams(P)
 
   P%WantScalars = Ini_Read_Logical('get_scalar_cls')
   P%WantVectors = Ini_Read_Logical('get_vector_cls',.false.)

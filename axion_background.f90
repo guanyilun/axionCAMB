@@ -242,7 +242,8 @@ contains
     omegah2_ax=Params%omegaax*(hnot**2.0d0)   
     maxion_twiddle= Params%ma
     !Hubble parameter in eV
-    H_eV=1.d14*6.5821d-25*hnot/(MPC_in_sec*c)
+    ! H_eV=1.d14*6.5821d-25*hnot/(MPC_in_sec*c)
+    H_eV=1.d14*6.5821d-25/(MPC_in_sec*c)  ! YG: debug
     !convert axion mass units from eV to H
     maxion_twiddle = maxion_twiddle/H_eV 
     !Total densities to juggle and use later
@@ -585,7 +586,9 @@ contains
             &maxion_twiddle,badflag,dloga,16,cmat(1:16,1:16),lhsqcont_massless,lhsqcont_massive,&
             &Params%Nu_mass_eigenstates,Nu_masses)
 
+       ! YG: 3 h (standard hubble constant (not conformal))
        diagnostic(1)=dfac*littlehfunc(1)/a_arr(1)
+    !    diagnostic(1)=dfac*littlehfunc(1)/a_arr(1)/hnot  ! YG: debug
 
 !!!!
 
@@ -627,7 +630,8 @@ contains
 
           !compare m to nH and identify a reasonable guess for when a given history crosses the m=3H 
           ! condition (and thus when the code will switch from pure scalar evolution to coherent oscillation)
-          diagnostic(i)=dfac*littlehfunc(i)/a_arr(i)
+          diagnostic(i)=dfac*littlehfunc(i)/a_arr(i) 
+        !   diagnostic(i)=dfac*littlehfunc(i)/a_arr(i) / hnot    ! YG: debug
           ! find first guess for aosc
           if (i .gt. 1) then
              if (aosc .eq. 15.0d0) then
@@ -640,7 +644,8 @@ contains
           endif
        enddo
 !!!!now there's an array of dlog(diagnostic), use a simple spline to find aosc
-
+       ! YG: maxion_twiddle = m_ax / H_0, so f_arr is 
+       ! m_ax / H_0 / (3 h_conformal / a) = m_ax / 3 (H_0 * h_standard)
        f_arr(1:ntable)=maxion_twiddle/(diagnostic(1:ntable))
        f_arr=dlog(f_arr)
 
@@ -801,6 +806,10 @@ contains
     else
        a_final=1.0d0
     endif
+    ! use user-supplied a_final if it is positive
+    if (Params%afinal .gt. 0.0d0) then
+       a_final=Params%afinal
+    endif
     log_a_final=dlog(a_final)
     dloga=(log_a_final-log_a_init)/dble(ntable-1)
 
@@ -862,6 +871,7 @@ contains
     !and appropriately normalized energy density
     forall(i=1:ntable)
        diagnostic(i)=dfac*littlehfunc(i)/a_arr(i)
+    !    diagnostic(i)=dfac*littlehfunc(i)/a_arr(i)/hnot  ! YG: debug
        Params%wax_table(i)=(((v_vec(2,i)/(a_arr(i)))**2.0d0)-((v_vec(1,i)*maxion_twiddle)**2.0d0))
        Params%wax_table(i)=Params%wax_table(i)/(((v_vec(2,i)/(a_arr(i)))**2.0d0)+((v_vec(1,i)*maxion_twiddle)**2.0d0))
        !!tabulate axion energy density
@@ -920,6 +930,10 @@ contains
     enddo
 !!!!!!!!!
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!store axion phi0 and phi0dot (v_vec(1,i) and v_vec(2,i) respectively)
+Params%v1_table = v_vec(1, 1:ntable)
+Params%v2_table = v_vec(2, 1:ntable)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!
     !use same spline method used in rest of subroutine to find new aeq value in this cosmological history (will be needed in initial condition code to normalize, time, scale factor, etc, in particular for isocurvature mode
@@ -988,7 +1002,7 @@ contains
     if (Params%axion_isocurvature) then
 
        Params%amp_i = Params%Hinf**2/(pi**2*Params%phiinit**2)
-       Params%r_val  = 2*(Params%Hinf**2/(pi**2.*Params%InitPower%ScalarPowerAmp(1)))
+       Params%r_val = 2*(Params%Hinf**2/(pi**2.*Params%InitPower%ScalarPowerAmp(1)))
        Params%alpha_ax = Params%amp_i/Params%InitPower%ScalarPowerAmp(1)
        !print*, 'computing isocurvature', Params%amp_i, Params%r_val, Params%axfrac**2*Params%amp_i/Params%InitPower%ScalarPowerAmp(1), Params%Hinf
        !print*, 'computing isocurvature, Params%amp_i, Params%r_val, Params%axfrac**2*Params%amp_i/Params%InitPower%ScalarPowerAmp(1), Params%Hinf'
