@@ -2171,15 +2171,18 @@
 !		initv(6,i_v_ax)=-x/5.0d0
 			
 		! Normalisation of *gamma* perturbation
-		
 		 AA=Ra*(omr**4.0d0)*(FF**4.0d0)
+
+        ! YG: debug
+ 		! initv(6,i_v_ax)=initv(6, i_v_ax) * k
+
 !		print*,AA,omtau
 		
-		 initv(6,i_clxg)= -AA/3.*omtau**4.
-         initv(6,i_clxr)=initv(6,i_clxg)
-         initv(6,i_clxb)=0.75_dl*initv(6,i_clxg)
-         initv(6,i_clxc)=initv(6,i_clxb)
-		 initv(6,i_eta)=-(0.50*initv(6,i_clxg))
+		initv(6,i_clxg)= -AA/3.*omtau**4.
+        initv(6,i_clxr)=initv(6,i_clxg)
+        initv(6,i_clxb)=0.75_dl*initv(6,i_clxg)
+        initv(6,i_clxc)=initv(6,i_clxb)
+		initv(6,i_eta)=-(0.50*initv(6,i_clxg))
 		!DM: this eta is -2eta_s, see notes and below setting y(2)
 		
 		initv(6,i_qg)=initv(6,i_clxg)*x/15.0d0 !YG: /15 or /20? see eq 20 in hlozek 2017
@@ -2525,11 +2528,11 @@
 
     ! YG: calculate phi1
     ! recall that grhoax_t = 8piG rho_ax a^2
-    ! phi1 = -3.d0 * adotoa * (1-cad2_use) * v_ax * grhoax_t**0.5 / (2.d0 * m_ax * k * (1-w_ax)**0.5 * a) / kappa**0.5
-    ! Arr(Transfer_axion) = phi1
+    phi1 = -3.d0 * adotoa * (1-cad2_use) * v_ax * grhoax_t**0.5 / (2.d0 * m_ax * k * (1-w_ax)**0.5 * a) / kappa**0.5
+    Arr(Transfer_axion) = phi1
     phi1 = v_ax*grhoax_t**0.5 / (k*(1+w_ax)**0.5) / kappa**0.5
 	Arr(Transfer_f) = phi1
-    Arr(Transfer_axion) = clxax /k2
+    ! Arr(Transfer_axion) = clxax /k2
 	! Arr(Transfer_f) = v_ax/k2
     Arr(Transfer_tot) = dgrho/grho/k2
     
