@@ -4,3 +4,5 @@
 camb
 *.i90
 *.ini
+test_*.dat
+isotest_*.dat
