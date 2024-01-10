@@ -223,8 +223,6 @@ omegah2_rad=((CP%TCMB**4.0d0)/(rhocrit))/(c**2.0d0)
 
     omegah2_rad=omegah2_rad*a_rad*1.d1/(1.d4)
         nnu=CP%Num_Nu_massless
-        
-        
         omegah2_rad=omegah2_rad+(nnu*grhor*(c**2.0d0)/((1.d5**2.0d0)))/3.0d0 
         GetOmegak = 1.0d0 - (CP%omegab+CP%omegac+CP%omegav+CP%omegan+CP%omegaax)-omegah2_rad/((CP%H0/1.d2)**2.0d0)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	!!
@@ -2428,6 +2426,7 @@ grhoax_t=dorp*a2
     subroutine outtransf(EV, y, tau,Arr)
     !write out clxc, clxb, clxg, clxn
     use Transfer
+    use Constants
     implicit none
     type(EvolutionVars) EV
     
@@ -2442,6 +2441,9 @@ grhoax_t=dorp*a2
     real(dl) clxax,grhoax_t
     
     integer i	
+
+    ! YG: add phi1 dependencies
+    real(dl) m_ax, adotoa, dtauda, w_ax, cad2, cad2_use, phi1
     
     a    = y(1)
     clxc = y(3)
@@ -2521,8 +2523,30 @@ grhoax_t=dorp*a2
     
     !call GrowthRate(EV,y,tau,k,a,growth,clxtot)
     !Arr(Transfer_f) = growth
+
 	v_ax = y(EV%a_ix+1)
-	Arr(Transfer_f) = v_ax/k2
+	! Arr(Transfer_f) = v_ax/k2
+
+    ! YG: calculate phi1 instead of v_ax
+    !   phi1 = - [ 3 H_conformal (1 - cad2) u_ax rho_a^1/2 ] / [ 2 m_a k (1 - w_a)^1/2 ]
+    adotoa = 1.d0 / (a * dtauda(a))  ! H_conformal
+    m_ax = EV%m_ax  ! TODO: check unit
+
+    ! YG: w_ax, cad2
+    if (a .lt. CP%a_osc) then
+        call spline_out(CP%loga_table,CP%wax_table,CP%wax_table_buff,ntable,dlog10(a),w_ax)
+        ! YG: get c_ad^2 (cad2)
+        call spline_out(CP%loga_table(2:ntable),CP%cs2_table(2:ntable),CP%cs2_table_buff(2:ntable),ntable-1,&
+            dlog10(a),cad2) 
+        cad2_use = dble(cad2)
+    else
+        w_ax = 0
+        cad2_use = 0.d0
+    end if
+    ! YG: recall grhoax_t = 8\pi G rho_ax a^2 = kappa rho_ax a^2
+    !   -> rho_ax = grhoax_t / (kappa * a^2)
+    phi1 = -3.d0 * adotoa * (1.d0 - cad2_use) * v_ax * (grhoax_t / kappa)**0.5 / (2.d0 * m_ax * k * (1.d0 - w_ax)**0.5 * a)
+	Arr(Transfer_f) = phi1
 	
     Arr(Transfer_tot) = dgrho/grho/k2
     
