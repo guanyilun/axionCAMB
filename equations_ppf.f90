@@ -2443,7 +2443,7 @@ grhoax_t=dorp*a2
     integer i	
 
     ! YG: add phi1 dependencies
-    real(dl) m_ax, adotoa, dtauda, w_ax, cad2, cad2_use, phi1
+    real(dl) m_ax, adotoa, dtauda, w_ax, cad2, cad2_use, phi1, rho_ax_sqrt
     
     a    = y(1)
     clxc = y(3)
@@ -2530,7 +2530,8 @@ grhoax_t=dorp*a2
     ! YG: calculate phi1 instead of v_ax
     !   phi1 = - [ 3 H_conformal (1 - cad2) u_ax rho_a^1/2 ] / [ 2 m_a k (1 - w_a)^1/2 ]
     adotoa = 1.d0 / (a * dtauda(a))  ! H_conformal
-    m_ax = EV%m_ax  ! TODO: check unit
+    ! m_ax = EV%m_ax  ! dimensionless in m_a / H_0
+    m_ax = CP%ma * 1e-9  ! m_a in GeV
 
     ! YG: w_ax, cad2
     if (a .lt. CP%a_osc) then
@@ -2545,9 +2546,10 @@ grhoax_t=dorp*a2
     end if
     ! YG: recall grhoax_t = 8\pi G rho_ax a^2 = kappa rho_ax a^2
     !   -> rho_ax = grhoax_t / (kappa * a^2)
-    phi1 = -3.d0 * adotoa * (1.d0 - cad2_use) * v_ax * (grhoax_t / kappa)**0.5 / (2.d0 * m_ax * k * (1.d0 - w_ax)**0.5 * a)
+    ! make sure we get the right units
+    rho_ax_sqrt = grhoax_t**0.5 * 1.5573728e-20_dl / a ! sqrt(rho_ax) in GeV^2
+    phi1 = -3.d0 * adotoa * (cad2_use - 1.d0) * v_ax * rho_ax_sqrt / (2.d0 * m_ax * k * (1.d0 - w_ax)**0.5)
 	Arr(Transfer_f) = phi1
-	
     Arr(Transfer_tot) = dgrho/grho/k2
     
     
