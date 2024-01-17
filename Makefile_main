@@ -78,6 +78,9 @@ camb: $(CAMBOBJ) $(DRIVER)
 $(CAMBLIB): $(CAMBOBJ)
 	ar -r $@ $(CAMBOBJ)
 
+camb_shared: $(CAMBOBJ)
+	$(F90C) -shared -o libcamb.so $(CAMBOBJ)
+
 camb_fits: writefits.f90 $(CAMBOBJ) $(DRIVER)
 	$(F90C) $(F90FLAGS) -I$(HEALPIXDIR)/include $(CAMBOBJ) writefits.f90 $(DRIVER) $(HEALPIXLD) -DWRITE_FITS -o $@
 

@@ -106,7 +106,7 @@ real(dl),parameter::eps=0.001
 real(dl) a_arr(ntable) ! scale factor
 !scalar field and its derivative (in appropriate units), conformal Hubble parameter /(100 km /s/ Mpc) as a function of scale factor
 real(dl) v_vec(2,ntable),littlehfunc(ntable) 
-!m/(dfac*littlehfunc*a) diagnostic parameter that is used to identify approximate aosc
+! m/(dfac*littlehfunc*a) diagnostic parameter that is used to identify approximate aosc
 real(dl) diagnostic(ntable)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -305,6 +305,9 @@ do k=1,Params%Nu_mass_eigenstates,1
 !	call Nu_rho(1.0d0,rhonu)
 !	print*,Nu_masses(k)*conv
 enddo
+! assume only one massive neutrino species is important to print out
+print*, "Nu_masses =", Nu_masses(1)
+print*, "lhsqcont_massive =", lhsqcont_massive(1)
 !print*,lhsqcont_massive(1)/Params%Nu_mass_degeneracies(1)
 
 !! Params%omegah2_rad=Params%omegah2_rad+
@@ -312,7 +315,8 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !Switch between  evolution regimes
 !definition of m=nH pmatch point, use 3 for convention
-dfac=3.0d0
+! dfac=3.0d0
+dfac=1.0d1  ! YG: test
 !!!!!!!!!!!!!
 
 
@@ -539,6 +543,7 @@ a_final=1.0d0
   !set log a bin size
    dloga=(log_a_final-log_a_init)/(dble(ntable-1)) ! RH: DG's original
 	a_arr(1)=dexp(log_a_init)
+print*, 'a_init =', a_init
 !Feed to output parameter table
    !initial loga and a value
    Params%loga_table(1)=log_a_init
@@ -731,7 +736,7 @@ aosc=dexp(laosc)
 ! fout=((maxion_twiddle*phiosc)**2.0d0+(phidosc/aosc)**2.0d0)*(aosc**3.0d0)
 ! YG: correction
 fout=((maxion_twiddle*phiosc)**2.0d0+(phidosc/aosc)**2.0d0)*(aosc**3.0d0) * hsq
-fout=fout/(omegah2_regm+((maxion_twiddle*phiosc)**2.0d0+(phidosc/aosc)**2.0d0)*(aosc**3.0d0))
+fout=fout/(omegah2_regm+fout)
 !print*,vtwiddle_init,aosc,fout,fax
 fout_arr(j)=fout
 fout_check_arr(j)=fout/fax
@@ -1037,6 +1042,13 @@ if (Params%axion_isocurvature) then
 Params%amp_i = Params%Hinf**2/(pi**2*Params%phiinit**2)
 Params%r_val  = 2*(Params%Hinf**2/(pi**2.*Params%InitPower%ScalarPowerAmp(1)))
 Params%alpha_ax = Params%amp_i/Params%InitPower%ScalarPowerAmp(1)
+print*, "amp_i =", Params%amp_i
+print*, "r_val =", Params%r_val
+print*, "alpha_ax =", Params%alpha_ax
+print*, "phiinit =", Params%phiinit
+! print*, "v1_init =", v_vec(1,1)
+! print*, "v2_init =", v_vec(2,1)
+
 !print*, 'computing isocurvature', Params%amp_i, Params%r_val, Params%axfrac**2*Params%amp_i/Params%InitPower%ScalarPowerAmp(1), Params%Hinf
 !print*, 'computing isocurvature, Params%amp_i, Params%r_val, Params%axfrac**2*Params%amp_i/Params%InitPower%ScalarPowerAmp(1), Params%Hinf'
 end if
