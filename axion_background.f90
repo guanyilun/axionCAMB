@@ -1042,12 +1042,22 @@ if (Params%axion_isocurvature) then
 Params%amp_i = Params%Hinf**2/(pi**2*Params%phiinit**2)
 Params%r_val  = 2*(Params%Hinf**2/(pi**2.*Params%InitPower%ScalarPowerAmp(1)))
 Params%alpha_ax = Params%amp_i/Params%InitPower%ScalarPowerAmp(1)
+! some printouts useful for output parsing -> avoid recomputation in external codes
 print*, "amp_i =", Params%amp_i
 print*, "r_val =", Params%r_val
 print*, "alpha_ax =", Params%alpha_ax
 print*, "phiinit =", Params%phiinit
-! print*, "v1_init =", v_vec(1,1)
-! print*, "v2_init =", v_vec(2,1)
+print*, "omegah2_regm =", omegah2_regm
+print*, "omegah2_rad =", Params%omegah2_rad
+print*, "omegah2_lambda =", omegah2_lambda
+print*, "omk =", omk
+! debug: for comparison of ode solution with python solution
+! open(10, file='tmp.txt')
+! do i = 1, ntable
+!     ! Write the values of v_vec(1, i), v_vec(2, i), and logatable(i) to the file
+!     write(10, *) Params%loga_table(i), v_vec(1, i), v_vec(2, i)
+! end do
+! close(10)
 
 !print*, 'computing isocurvature', Params%amp_i, Params%r_val, Params%axfrac**2*Params%amp_i/Params%InitPower%ScalarPowerAmp(1), Params%Hinf
 !print*, 'computing isocurvature, Params%amp_i, Params%r_val, Params%axfrac**2*Params%amp_i/Params%InitPower%ScalarPowerAmp(1), Params%Hinf'
