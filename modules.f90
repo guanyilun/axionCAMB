@@ -125,9 +125,13 @@
     real(dl)  :: H0,TCMB,yhe,Num_Nu_massless
     real(dl)  :: ratio
 
-    real(dl), dimension(100000, 1, 6) :: RHCl_temp ! RH temp vector which will contain the axion iso spectrum ! RH
-    real(dl), dimension(100000, 1, 6) :: RHCl_temp_lensed ! RH temp vector which will contain the axion iso spectrum ! RH
-    real(dl), dimension(100000, 1, 6) :: RHCl_temp_tensor ! RH temp vector which will contain the axion iso spectrum ! RH
+    ! real(dl), dimension(100000, 1, 6) :: RHCl_temp ! RH temp vector which will contain the axion iso spectrum ! RH
+    ! real(dl), dimension(100000, 1, 6) :: RHCl_temp_lensed ! RH temp vector which will contain the axion iso spectrum ! RH
+    ! real(dl), dimension(100000, 1, 6) :: RHCl_temp_tensor ! RH temp vector which will contain the axion iso spectrum ! RH
+    ! YG: allocate lower memory
+    real(dl), dimension(10000, 1, 6) :: RHCl_temp ! RH temp vector which will contain the axion iso spectrum ! RH
+    real(dl), dimension(10000, 1, 6) :: RHCl_temp_lensed ! RH temp vector which will contain the axion iso spectrum ! RH
+    real(dl), dimension(10000, 1, 6) :: RHCl_temp_tensor ! RH temp vector which will contain the axion iso spectrum ! RH
 
     !DM: tensor to scalar ratio is in CP for use in axion isocurvature i.c.'s 
     integer   :: Num_Nu_massive !sum of Nu_mass_numbers below
